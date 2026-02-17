@@ -1,0 +1,23 @@
+{
+  "upper_body": {
+    "count": 50,
+    "prompts": [
+      "Photorealistic human avatar, face or upper-body, centered, neutral background, no product, no objects, no text, professional studio lighting. Style: fitness. Gender: female. Age: 20-40. Skin tone: diverse. Hair: diverse.",
+      "Photorealistic human avatar, face or upper-body, centered, neutral background, no product, no objects, no text, professional studio lighting. Style: business. Gender: male. Age: 30-50. Skin tone: diverse. Hair: diverse.",
+      "Photorealistic human avatar, face or upper-body, centered, neutral background, no product, no objects, no text, professional studio lighting. Style: casual. Gender: non-binary. Age: 18-60. Skin tone: diverse. Hair: diverse."
+    ],
+    "save_path": "./avatars/upper_body",
+    "retry_on_fail": 2
+  },
+  "full_body": {
+    "count": 50,
+    "prompts": [
+      "Photorealistic full-body human, centered, full body visible, neutral background, no text, no objects, professional lighting. Style: fitness. Gender: female. Age: 20-40. Skin tone: diverse. Hair: diverse.",
+      "Photorealistic full-body human, centered, full body visible, neutral background, no text, no objects, professional lighting. Style: business. Gender: male. Age: 30-50. Skin tone: diverse. Hair: diverse.",
+      "Photorealistic full-body human, centered, full body visible, neutral background, no text, no objects, professional lighting. Style: casual. Gender: non-binary. Age: 18-60. Skin tone: diverse. Hair: diverse."
+    ],
+    "save_path": "./avatars/full_body",
+    "aspect_ratio": "9:16",
+    "retry_on_fail": 2
+  }
+}

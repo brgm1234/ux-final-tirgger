@@ -1,0 +1,32 @@
+{
+  "name": "cloud-veo3-pro-mvp",
+  "version": "0.2.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "test:apis": "node check-apis.js"
+  },
+  "dependencies": {
+    "@shotstack/shotstack-sdk": "npm:shotstack-sdk@^0.2.9",
+    "apify": "^3.5.0",
+    "apify-client": "^2.9.0",
+    "axios": "^1.6.5",
+    "better-sqlite3": "^11.10.0",
+    "cloudinary": "^2.9.0",
+    "dotenv": "^16.3.1",
+    "next": "14.2.18",
+    "node-fetch": "^3.3.2",
+    "openai": "^4.104.0",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "react-markdown": "^10.1.0",
+    "sharp": "^0.33.4"
+  },
+  "devDependencies": {
+    "@types/react": "19.2.10",
+    "tsx": "^4.21.0",
+    "typescript": "^5.2.2"
+  }
+}

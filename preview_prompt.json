@@ -1,0 +1,52 @@
+{
+  "task": "Full pipeline pre-test with VEO3 + Shotstack",
+  "description": "Generate a short-form product video for Magic Coffee Mug, using a single prompt optimized for VEO3 and a Shotstack timeline. Include pre-test visual verification, traceability logs, and no null values for TypeScript compliance. Prompt Orchestrator ensures VEO3 receives a clean, actionable prompt.",
+  "product": {
+    "name": "Magic Coffee Mug",
+    "description": "A mug that keeps coffee hot for 12 hours.",
+    "features": ["Keeps temperature", "Spill-proof lid", "Ergonomic handle"],
+    "images": ["images/mug_front.png", "images/mug_side.png", "images/mug_lid.png"]
+  },
+  "prompt_orchestrator": {
+    "function": "Combine all product info, features, and attached images into a single, VEO3-compatible prompt. Ensure each scene is clear, visually verifiable, and no null values exist. Generate a Shotstack timeline that matches each scene with the corresponding image.",
+    "rules": [
+      "Merge all scenes into one VEO3 prompt to reduce API calls.",
+      "Attach images to relevant scenes for image-to-video processing.",
+      "Ensure prompt uses natural, descriptive language suitable for VEO3.",
+      "Trace every step for review before final execution.",
+      "Validate that assetRef points to existing images."
+    ]
+  },
+  "veo3_prompt": "A realistic short-form product ad video for Magic Coffee Mug. Include the following scenes in a single request: \n1. Mug close-up with steam, smooth camera move, shallow depth of field, using image 'images/mug_front.png'. \n2. Mug handle close-up highlighting ergonomic design, using image 'images/mug_side.png'. \n3. Mug call-to-action with lid, visible features, realistic materials, honest lighting, and true-to-life textures, using image 'images/mug_lid.png'.",
+  "shotstack_timeline": [
+    {
+      "sceneId": "hook",
+      "label": "Mug close-up with steam",
+      "duration": 4,
+      "transition": "fade",
+      "assetRef": "images/mug_front.png"
+    },
+    {
+      "sceneId": "feature",
+      "label": "Mug handle close-up",
+      "duration": 4,
+      "transition": "fade",
+      "assetRef": "images/mug_side.png"
+    },
+    {
+      "sceneId": "cta",
+      "label": "Mug call-to-action with lid",
+      "duration": 4,
+      "transition": "fade",
+      "assetRef": "images/mug_lid.png"
+    }
+  ],
+  "traceability_notes": [
+    "All assetRefs provided, no null values.",
+    "Prompt Orchestrator ensured VEO3 receives a fully structured, understandable prompt.",
+    "Single request used for all scenes to minimize API usage and cost.",
+    "Pre-test mode will generate visual previews and logs before full execution."
+  ],
+  "execution_mode": "pre-test",
+  "output_files": ["preview_prompt.json", "pipeline_preview.json"]
+}
