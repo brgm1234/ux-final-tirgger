@@ -7,15 +7,15 @@ import dotenv from "dotenv";
 /**
  * Local pipeline runner for Sora 2 + Shotstack.
  *
- * ✅ Required env vars in .env.local:
+ * â Required env vars in .env.local:
  * - SORA_2_API_KEY=your_vidgo_key
  * - SHOTSTACK_API_KEY=your_shotstack_key
  * - VEO3_PROMPT_IMAGE_URL=https://... (required if no product image URL)
  *
- * ✅ Run (full):
+ * â Run (full):
  *   npx tsx run_pipeline.ts
  *
- * ✅ Run (pre-test, first scene only):
+ * â Run (pre-test, first scene only):
  *   npx tsx run_pipeline.ts --pretest
  */
 
@@ -87,24 +87,23 @@ const toDataUrl = (filePath: string) => {
   return `data:${mime};base64,${data.toString("base64")}`;
 };
 
-const ensurePlaceholderImage = (filePath: string) => {
-  const placeholderBase64 =
-    "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR4nGNgYAAAAAMAASsJTYQAAAAASUVORK5CYII=";
-  ensureDir(path.dirname(filePath));
-  if (!fs.existsSync(filePath)) {
-    fs.writeFileSync(filePath, Buffer.from(placeholderBase64, "base64"));
-  }
-};
-
 const resolvePromptImage = (assetRef: string, traceLog: string) => {
   if (isUrl(assetRef)) return assetRef;
 
   const absolute = path.isAbsolute(assetRef) ? assetRef : path.join(process.cwd(), assetRef);
   if (!fs.existsSync(absolute)) {
-    ensurePlaceholderImage(absolute);
-    appendLog(`Asset missing, placeholder created at ${assetRef}`, traceLog);
+    throw new Error(
+      `Product image not found at \"${assetRef}\" (resolved: \"${absolute}\"). ` +
+      `Please provide a valid product image in the images/ directory or supply a URL.`
+    );
   }
 
+  const size = fs.statSync(absolute).size;
+  if (size <= 0) {
+    throw new Error(`Product image at \"${absolute}\" is empty (0 bytes).`);
+  }
+
+  appendLog(`Resolved product image: ${assetRef} (${size} bytes)`, traceLog);
   return toDataUrl(absolute);
 };
 
@@ -141,7 +140,7 @@ const generateVeo3FastVideo = async (promptText: string, promptImage: string, du
         duration: duration || 8,
         resolution: "1080p",
         aspect_ratio: "16:9",
-        generation_type: "text-to-video",
+        generation_type: promptImage ? "image-to-video" : "text-to-video",
         reference_images: promptImage ? [promptImage] : [],
       },
       {
@@ -191,7 +190,7 @@ const renderShotstack = async (
   const env = process.env.SHOTSTACK_ENV || "staging";
   if (!apiKey) throw new Error("Missing SHOTSTACK_API_KEY");
 
-  const baseUrl = env === "production" ? "https://api.shotstack.io/edit/v1" : "https://api.shotstack.io/edit/v1";
+  const baseUrl = env === "production" ? "https://api.shotstack.io/edit/v1" : "https://api.shotstack.io/stage/v1";
 
   const payload = {
     timeline,
@@ -370,7 +369,7 @@ async function main() {
   }
 
   if (pretest) {
-    console.log("\n✅ Pre-test complete. Only the first scene was generated.");
+    console.log("\nâ Pre-test complete. Only the first scene was generated.");
     appendLog("Pre-test mode: stopped after first scene.", traceLog);
     return;
   }
@@ -401,12 +400,12 @@ async function main() {
   await downloadFile(finalUrl, finalPath);
   verifyFile(finalPath, "Final output");
 
-  console.log("\n✅ Pipeline complete. Outputs saved in pipeline_outputs.");
+  console.log("\nâ Pipeline complete. Outputs saved in pipeline_outputs.");
   appendLog("Pipeline complete. Final output saved.", traceLog);
 }
 
 main().catch((error) => {
-  console.error("\n❌ Pipeline failed:", error.message || error);
+  console.error("\nâ Pipeline failed:", error.message || error);
   const pretest = process.argv.includes("--pretest") || process.env.PRETEST === "1";
   const outputDir = pretest ? PRETEST_OUTPUT_DIR : BASE_OUTPUT_DIR;
   const traceLog = path.join(outputDir, "traceability.log");
