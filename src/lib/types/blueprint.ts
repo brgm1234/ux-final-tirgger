@@ -2,6 +2,8 @@
  * Type definitions for product identity and logic blueprints.
  */
 
+import type { VerifiedAsset } from "./assets";
+
 export interface ProductTruth {
   object_form: string[];
   materials: string[];
@@ -21,13 +23,6 @@ export interface ProductMatch {
   compatibleAssets: VerifiedAsset[];
   logicReuseAllowed: boolean;
   justification: string;
-}
-
-export interface VerifiedAsset {
-  id: string;
-  url: string;
-  type: "image" | "video" | "audio";
-  tags: string[];
 }
 
 export interface ProductIdentity {

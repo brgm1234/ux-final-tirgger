@@ -6,7 +6,7 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import { smartVideoPipeline } from "../../../../engines/orchestrator/smartVideoPipeline";
+import { smartVideoPipeline } from "@lib/pipeline/smart-video-pipeline";
 
 export async function POST(request: NextRequest) {
   try {
@@ -54,10 +54,11 @@ export async function POST(request: NextRequest) {
       prompt: result.prompt,
       output: result.output,
     });
-  } catch (error: any) {
-    console.error("Video generation API error:", error);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "Internal server error";
+    console.error("Video generation API error:", message);
     return NextResponse.json(
-      { error: error.message || "Internal server error" },
+      { error: message },
       { status: 500 }
     );
   }
