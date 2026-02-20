@@ -76,6 +76,13 @@ export default function HomePage() {
     updateStep("vision", "running");
 
     try {
+      console.log("[v0] Sending generate-video request with:", {
+        productImageUrl: data.productImageUrl,
+        avatarImageUrl: data.avatarImageUrl,
+        marketingAngle: data.marketingAngle,
+        options: data.options,
+      });
+
       const res = await fetch("/api/generate-video", {
         method: "POST",
         headers: { "Content-Type": "application/json" },

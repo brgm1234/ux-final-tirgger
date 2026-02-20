@@ -1,13 +1,30 @@
 /**
  * Asset Matcher - Matches and validates product assets for video generation.
+ * NOTE: Runs in a serverless/edge environment. No Node.js fs/path usage.
  */
 
 import type { VerifiedAsset, ProductMatch } from "../types";
-import fs from "node:fs";
-import path from "node:path";
+
+/**
+ * Extract a filename from a URL or path string.
+ */
+function extractFilename(input: string): string {
+  const segments = input.split("/");
+  const last = segments[segments.length - 1] || "asset";
+  return last.split("?")[0] || "asset";
+}
+
+/**
+ * Extract a file extension from a filename.
+ */
+function extractExtension(filename: string): string {
+  const parts = filename.split(".");
+  return parts.length > 1 ? parts[parts.length - 1].toLowerCase() : "png";
+}
 
 /**
  * Match available product assets against pipeline requirements.
+ * Accepts file path strings (treated as identifiers) and remote URLs.
  */
 export function matchProductAssets(
   productImagePaths: string[],
@@ -15,38 +32,38 @@ export function matchProductAssets(
 ): ProductMatch {
   const compatibleAssets: VerifiedAsset[] = [];
 
-  // Check local file assets
+  // Process local file path identifiers (no filesystem access - just metadata)
   for (const filePath of productImagePaths) {
-    const absolute = path.isAbsolute(filePath) ? filePath : path.join(process.cwd(), filePath);
-    if (fs.existsSync(absolute)) {
-      const stats = fs.statSync(absolute);
-      if (stats.size > 0) {
-        const ext = path.extname(absolute).toLowerCase();
-        compatibleAssets.push({
-          id: path.basename(absolute, ext),
-          url: absolute,
-          type: "image",
-          format: ext.replace(".", ""),
-          sizeBytes: stats.size,
-          tags: ["product", "local"],
-          source: "upload",
-          verified: true,
-          verifiedAt: new Date().toISOString(),
-          qualityScore: 0.7,
-          usableFor: ["reference", "product-shot"],
-        });
-      }
-    }
+    if (!filePath) continue;
+    const filename = extractFilename(filePath);
+    const ext = extractExtension(filename);
+    const id = filename.replace(`.${ext}`, "");
+
+    compatibleAssets.push({
+      id,
+      url: filePath,
+      type: "image",
+      format: ext,
+      tags: ["product", "local"],
+      source: "upload",
+      verified: true,
+      verifiedAt: new Date().toISOString(),
+      qualityScore: 0.7,
+      usableFor: ["reference", "product-shot"],
+    });
   }
 
-  // Check URL assets
+  // Process URL assets
   for (const url of productImageUrls) {
     if (url && url.startsWith("http")) {
+      const filename = extractFilename(url);
+      const ext = extractExtension(filename);
+
       compatibleAssets.push({
-        id: url.split("/").pop()?.split("?")[0] || "remote-asset",
+        id: filename.replace(`.${ext}`, "") || "remote-asset",
         url,
         type: "image",
-        format: "png",
+        format: ext,
         tags: ["product", "remote"],
         source: "upload",
         verified: true,
