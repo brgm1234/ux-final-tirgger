@@ -1,24 +1,16 @@
 {
   "compilerOptions": {
-    "target": "ESNext",
+    "target": "ES2017",
     "module": "ESNext",
-    "moduleResolution": "Node",
+    "moduleResolution": "bundler",
     "jsx": "preserve",
     "strict": true,
     "baseUrl": ".",
     "paths": {
-      "@/*": [
-        "src/*"
-      ],
-      "@lib/*": [
-        "src/lib/*"
-      ]
+      "@/*": ["src/*"],
+      "@lib/*": ["src/lib/*"]
     },
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
-    ],
+    "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "skipLibCheck": true,
     "noEmit": true,
@@ -32,12 +24,10 @@
       }
     ]
   },
-  "exclude": [
-    "node_modules",
-    ".next"
-  ],
+  "exclude": ["node_modules", ".next"],
   "include": [
     "next-env.d.ts",
+    "global.d.ts",
     ".next/types/**/*.ts",
     "**/*.ts",
     "**/*.tsx"
