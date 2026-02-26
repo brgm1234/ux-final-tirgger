@@ -7,15 +7,15 @@ import dotenv from "dotenv";
 /**
  * Local pipeline runner for Sora 2 + Shotstack.
  *
- * â Required env vars in .env.local:
+ * Ã¢ÂÂ Required env vars in .env.local:
  * - SORA_2_API_KEY=your_vidgo_key
  * - SHOTSTACK_API_KEY=your_shotstack_key
  * - VEO3_PROMPT_IMAGE_URL=https://... (required if no product image URL)
  *
- * â Run (full):
+ * Ã¢ÂÂ Run (full):
  *   npx tsx run_pipeline.ts
  *
- * â Run (pre-test, first scene only):
+ * Ã¢ÂÂ Run (pre-test, first scene only):
  *   npx tsx run_pipeline.ts --pretest
  */
 
@@ -133,16 +133,20 @@ const generateVeo3FastVideo = async (promptText: string, promptImage: string, du
 
   let createResponse;
   try {
+    const body: Record<string, unknown> = {
+      model: "sora-2",
+      prompt: promptText,
+      duration: duration || 8,
+      resolution: "1080p",
+      aspect_ratio: "16:9",
+    };
+    if (promptImage) {
+      body.input_images = [promptImage];
+    }
+
     createResponse = await axios.post(
-      "https://api.vidgo.ai/v1/video-series/generate",
-      {
-        prompt: promptText,
-        duration: duration || 8,
-        resolution: "1080p",
-        aspect_ratio: "16:9",
-        generation_type: promptImage ? "image-to-video" : "text-to-video",
-        reference_images: promptImage ? [promptImage] : [],
-      },
+      "https://api.openai.com/v1/videos/generations",
+      body,
       {
         headers: {
           Authorization: `Bearer ${apiKey}`,
@@ -155,13 +159,13 @@ const generateVeo3FastVideo = async (promptText: string, promptImage: string, du
     throw new Error(`Sora 2 create failed: ${JSON.stringify(details)}`);
   }
 
-  const taskId = createResponse.data?.task_id || createResponse.data?.id;
-  if (!taskId) throw new Error("Sora 2 did not return task id");
+  const generationId = createResponse.data?.id;
+  if (!generationId) throw new Error("Sora 2 did not return generation id");
 
-  const statusUrl = `https://api.vidgo.ai/v1/video-series/status/${taskId}`;
+  const statusUrl = `https://api.openai.com/v1/videos/generations/${generationId}`;
   let status = "pending";
   let outputUrl: string | null = null;
-  while (status !== "finished" && status !== "failed" && status !== "error") {
+  while (status !== "completed" && status !== "failed") {
     await new Promise((r) => setTimeout(r, 5000));
     const poll = await axios.get(statusUrl, {
       headers: {
@@ -171,10 +175,12 @@ const generateVeo3FastVideo = async (promptText: string, promptImage: string, du
     });
 
     status = String(poll.data?.status || "").toLowerCase();
-    if (status === "failed" || status === "error") {
-      throw new Error("Sora 2 task failed");
+    if (status === "failed") {
+      throw new Error(`Sora 2 task failed: ${JSON.stringify(poll.data?.error || "unknown")}`);
     }
-    outputUrl = poll.data?.video_url || poll.data?.url || poll.data?.output_url || null;
+    if (status === "completed") {
+      outputUrl = poll.data?.data?.[0]?.url || null;
+    }
   }
 
   return outputUrl;
@@ -369,7 +375,7 @@ async function main() {
   }
 
   if (pretest) {
-    console.log("\nâ Pre-test complete. Only the first scene was generated.");
+    console.log("\nÃ¢ÂÂ Pre-test complete. Only the first scene was generated.");
     appendLog("Pre-test mode: stopped after first scene.", traceLog);
     return;
   }
@@ -400,12 +406,12 @@ async function main() {
   await downloadFile(finalUrl, finalPath);
   verifyFile(finalPath, "Final output");
 
-  console.log("\nâ Pipeline complete. Outputs saved in pipeline_outputs.");
+  console.log("\nÃ¢ÂÂ Pipeline complete. Outputs saved in pipeline_outputs.");
   appendLog("Pipeline complete. Final output saved.", traceLog);
 }
 
 main().catch((error) => {
-  console.error("\nâ Pipeline failed:", error.message || error);
+  console.error("\nÃ¢ÂÂ Pipeline failed:", error.message || error);
   const pretest = process.argv.includes("--pretest") || process.env.PRETEST === "1";
   const outputDir = pretest ? PRETEST_OUTPUT_DIR : BASE_OUTPUT_DIR;
   const traceLog = path.join(outputDir, "traceability.log");
